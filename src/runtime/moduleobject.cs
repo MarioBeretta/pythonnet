@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Python.Runtime
 {
@@ -504,6 +505,13 @@ namespace Python.Runtime
             set { _SuppressOverloads = value; }
         }
 
+        private static bool IsValidAssemblyName(string name)
+        {
+            string typeName = name.Split(',')[0];
+            if (typeName.Contains(Path.DirectorySeparatorChar)) return false;
+            return true;
+        }
+
         [ModuleFunction]
         [ForbidPythonThreads]
         public static Assembly AddReference(string name)
@@ -518,7 +526,8 @@ namespace Python.Runtime
             }
             if (assembly == null)
             {
-                assembly = AssemblyManager.LoadAssembly(name);
+                if (IsValidAssemblyName(name))
+                    assembly = AssemblyManager.LoadAssembly(name);
             }
             if (assembly == null)
             {
